@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONQUIISTA — SPIFF de Ventas PSW</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0D1B5E;--navy2:#1a2d7a;--sky:#b8d8ea;--sky2:#daedf7;
+  --cyan:#00C2CB;--lime:#7DC243;--offwhite:#f0f6fb;
+  --text:#0D1B5E;--soft:#4a6080;--border:#c8ddf0;--danger:#e53e3e;--gold:#f6c90e;
+}
+body{font-family:'Montserrat',sans-serif;background:var(--sky2);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 60%,#123580 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden;}
+.topo-bg{position:absolute;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Ccircle cx='300' cy='300' r='80' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3Ccircle cx='300' cy='300' r='160' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3Ccircle cx='300' cy='300' r='240' fill='none' stroke='rgba(255,255,255,0.02)' stroke-width='1'/%3E%3Ccircle cx='300' cy='300' r='320' fill='none' stroke='rgba(255,255,255,0.02)' stroke-width='1'/%3E%3C/svg%3E");background-size:500px 500px;}
+.login-mtn{width:100%;max-width:500px;margin-bottom:-8px;}
+.login-card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);backdrop-filter:blur(8px);border-radius:20px;padding:2rem 2.5rem;width:100%;max-width:400px;position:relative;z-index:2;}
+.psw-logo{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:800;color:white;letter-spacing:1px;text-align:center;margin-bottom:0.3rem;}
+.conquiista-h{font-family:'Barlow Condensed',sans-serif;font-size:2.1rem;font-weight:800;color:white;letter-spacing:4px;text-align:center;margin-bottom:0.2rem;}
+.ii{color:#7DC243;}
+.login-sub{font-size:0.72rem;color:rgba(255,255,255,0.45);text-align:center;text-transform:uppercase;letter-spacing:2px;margin-bottom:1.5rem;}
+.role-btns{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1rem;}
+.role-btn{font-family:'Montserrat',sans-serif;font-size:0.78rem;font-weight:700;padding:0.8rem 0.4rem;border-radius:12px;border:2px solid rgba(255,255,255,0.2);background:transparent;color:white;cursor:pointer;transition:all 0.2s;text-align:center;}
+.role-btn.selected{border-color:#00C2CB;background:rgba(0,194,203,0.15);color:#00C2CB;}
+.role-btn .ri{font-size:1.3rem;display:block;margin-bottom:0.25rem;}
+.login-input{font-family:'Montserrat',sans-serif;width:100%;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:white;font-size:0.9rem;margin-bottom:0.7rem;outline:none;transition:border-color 0.2s;}
+.login-input::placeholder{color:rgba(255,255,255,0.35);}
+.login-input:focus{border-color:#00C2CB;}
+.btn-enter{font-family:'Montserrat',sans-serif;width:100%;padding:0.85rem;border-radius:12px;border:none;background:linear-gradient(135deg,#00C2CB,#009aa2);color:white;font-size:0.95rem;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all 0.2s;}
+.btn-enter:hover{opacity:0.9;transform:translateY(-1px);}
+.login-err{color:#ff8a8a;font-size:0.78rem;text-align:center;margin-top:0.4rem;min-height:1rem;}
+.vendor-sel-wrap{margin-bottom:0.7rem;}
+.vendor-sel-wrap select{font-family:'Montserrat',sans-serif;width:100%;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:white;font-size:0.9rem;outline:none;}
+.vendor-sel-wrap select option{background:#1a2d7a;color:white;}
+
+/* ── APP ── */
+#app{display:none;flex-direction:column;min-height:100vh;}
+.app-header{background:var(--navy);padding:0.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(13,27,94,0.3);}
+.hdr-l{display:flex;align-items:center;gap:0.9rem;}
+.hdr-psw{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;color:white;letter-spacing:1px;}
+.hdr-div{width:1px;height:22px;background:rgba(255,255,255,0.2);}
+.hdr-cq{font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:800;color:white;letter-spacing:2px;}
+.hdr-r{display:flex;align-items:center;gap:0.6rem;}
+.mode-badge{font-size:0.68rem;font-weight:700;padding:0.28rem 0.75rem;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
+.mode-admin{background:rgba(0,194,203,0.2);color:#00C2CB;border:1px solid rgba(0,194,203,0.4);}
+.mode-viewer{background:rgba(125,194,67,0.2);color:#7DC243;border:1px solid rgba(125,194,67,0.4);}
+.btn-logout{font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;padding:0.28rem 0.7rem;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;}
+.btn-logout:hover{background:rgba(255,255,255,0.1);color:white;}
+
+/* ── HERO ── */
+.mountain-hero{background:linear-gradient(180deg,var(--navy) 0%,#1a3a8f 40%,#2060c0 70%,#4d9fd4 100%);padding:1.2rem 1rem 0;position:relative;overflow:hidden;}
+.topo-lines{position:absolute;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='300'%3E%3Cellipse cx='400' cy='350' rx='350' ry='120' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3Cellipse cx='400' cy='350' rx='270' ry='92' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3Cellipse cx='400' cy='350' rx='190' ry='65' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");background-size:cover;}
+.hero-top{display:flex;align-items:center;justify-content:space-between;padding:0 0.5rem;margin-bottom:0.6rem;position:relative;z-index:2;}
+.hero-title-block{text-align:center;flex:1;}
+.hero-spiff{font-size:0.68rem;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:3px;text-transform:uppercase;margin-bottom:0.1rem;}
+.hero-cq{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:800;color:white;letter-spacing:4px;line-height:1;}
+.hero-dur{font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.5);margin-top:0.15rem;}
+.stat-pill{text-align:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:0.45rem 0.9rem;min-width:85px;}
+.stat-pill-num{font-size:1.3rem;font-weight:800;color:#00C2CB;}
+.stat-pill-label{font-size:0.62rem;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;}
+#mountain-svg{display:block;width:100%;max-width:980px;margin:0 auto;}
+
+/* ── TABS ── */
+.tabs-wrapper{background:var(--navy2);display:flex;justify-content:center;flex-wrap:wrap;position:sticky;top:54px;z-index:90;border-bottom:2px solid rgba(255,255,255,0.1);}
+.tab-btn{font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;padding:0.85rem 1rem;border:none;background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.2s;letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;}
+.tab-btn.active{color:#00C2CB;border-bottom-color:#00C2CB;}
+.tab-btn:hover:not(.active){color:rgba(255,255,255,0.75);}
+.tab-notif{display:inline-flex;align-items:center;justify-content:center;background:#e53e3e;color:white;font-size:0.6rem;font-weight:800;min-width:16px;height:16px;border-radius:10px;padding:0 4px;margin-left:4px;vertical-align:middle;}
+
+/* ── CONTENT ── */
+.content-area{background:var(--offwhite);min-height:400px;padding:1.25rem;}
+.panel{display:none;}.panel.active{display:block;}
+
+/* ── GROUP / RANKING ── */
+.groups-wrap{display:flex;flex-direction:column;gap:1.5rem;max-width:1100px;margin:0 auto;}
+.group-block{background:white;border-radius:18px;border:1.5px solid var(--border);overflow:hidden;box-shadow:0 2px 12px rgba(13,27,94,0.07);}
+.group-header{padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
+.group-title{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;color:white;letter-spacing:2px;}
+.group-meta{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
+.group-count{font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;}
+.prize-badge{font-size:0.72rem;font-weight:800;padding:0.3rem 0.85rem;border-radius:20px;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.25);white-space:nowrap;}
+.group-leader-line{padding:0.5rem 1.25rem;font-size:0.78rem;font-weight:700;color:rgba(255,255,255,0.8);border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+.group-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:0.85rem;padding:1rem 1.25rem;}
+.climber-card{border-radius:14px;border:1.5px solid var(--border);padding:0.9rem;position:relative;overflow:hidden;transition:transform 0.15s,box-shadow 0.15s;background:white;}
+.climber-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(13,27,94,0.12);}
+.climber-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.rank-badge{position:absolute;top:0.6rem;right:0.6rem;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;}
+.climber-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;color:white;margin-bottom:0.5rem;}
+.climber-name{font-size:0.92rem;font-weight:800;color:var(--navy);margin-bottom:0.1rem;}
+.climber-pts{font-size:1.55rem;font-weight:900;color:var(--navy2);line-height:1;}
+.climber-pts-label{font-size:0.65rem;font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:0.4px;}
+.progress-wrap{margin-top:0.55rem;background:var(--sky2);border-radius:8px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:8px;transition:width 0.6s ease;}
+.meter-label{font-size:0.65rem;color:var(--soft);margin-top:0.25rem;font-weight:600;}
+.prize-tag{font-size:0.65rem;font-weight:800;margin-top:0.3rem;padding:0.15rem 0.5rem;border-radius:10px;display:inline-block;}
+
+/* ── PRIZES PANEL ── */
+.prizes-wrap{max-width:900px;margin:0 auto;}
+.prizes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.prize-card{border-radius:16px;padding:1.25rem;color:white;position:relative;overflow:hidden;}
+.prize-card-title{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:2px;margin-bottom:0.75rem;opacity:0.9;}
+.prize-place{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;}
+.prize-place-medal{font-size:1.1rem;}
+.prize-place-text{font-size:0.85rem;font-weight:700;}
+.prize-amount{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;color:var(--gold);}
+.prize-note{font-size:0.7rem;opacity:0.65;margin-top:0.6rem;line-height:1.4;}
+.prize-mountain{position:absolute;right:-10px;bottom:-10px;opacity:0.1;font-size:4rem;}
+
+/* ── FORMS ── */
+.form-card{background:white;border-radius:16px;border:1.5px solid var(--border);padding:1.5rem;max-width:600px;margin:0 auto;box-shadow:0 4px 20px rgba(13,27,94,0.07);}
+.form-stitle{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;color:var(--navy);margin-bottom:1.1rem;letter-spacing:1px;}
+.form-group{margin-bottom:0.9rem;}
+.form-label{display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--soft);margin-bottom:0.3rem;}
+select,input[type="text"],input[type="password"],textarea{font-family:'Montserrat',sans-serif;width:100%;padding:0.62rem 0.85rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;color:var(--text);background:var(--offwhite);outline:none;transition:border-color 0.2s;}
+select:focus,input:focus,textarea:focus{border-color:#00C2CB;background:white;}
+.pts-preview{display:flex;align-items:center;gap:0.5rem;margin:0.65rem 0;padding:0.6rem 0.9rem;background:rgba(13,27,94,0.05);border-radius:10px;border-left:4px solid var(--navy);}
+.pts-preview-num{font-size:1.3rem;font-weight:900;color:var(--navy2);}
+.pts-preview-text{font-size:0.82rem;color:var(--soft);font-weight:600;}
+.btn-primary{font-family:'Montserrat',sans-serif;font-size:0.88rem;font-weight:800;padding:0.78rem 2rem;background:var(--navy);color:white;border:none;border-radius:12px;cursor:pointer;width:100%;letter-spacing:1px;text-transform:uppercase;transition:all 0.2s;}
+.btn-primary:hover{background:var(--navy2);transform:translateY(-1px);}
+.btn-primary:active{transform:scale(0.98);}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.emb-section{background:rgba(125,194,67,0.07);border:1.5px solid rgba(125,194,67,0.3);border-radius:12px;padding:0.9rem;margin-bottom:0.75rem;}
+.emb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;}
+.emb-label{font-size:0.68rem;font-weight:700;color:var(--soft);text-transform:uppercase;margin-bottom:0.2rem;}
+
+/* ── HISTORIAL ── */
+.hist-wrap{max-width:740px;margin:0 auto;}
+.filter-bar{display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap;}
+.filter-bar select{width:auto;flex:1;min-width:150px;}
+.btn-clear-all{font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;padding:0.5rem 0.9rem;border-radius:8px;border:1.5px solid var(--danger);color:var(--danger);background:transparent;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.btn-clear-all:hover{background:var(--danger);color:white;}
+.hist-list{display:flex;flex-direction:column;gap:0.45rem;}
+.hist-item{background:white;border-radius:12px;border:1px solid var(--border);padding:0.7rem 0.95rem;display:flex;align-items:center;gap:0.7rem;}
+.hist-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;color:white;flex-shrink:0;}
+.hist-main{flex:1;min-width:0;}
+.hist-name{font-weight:800;color:var(--navy);font-size:0.88rem;}
+.hist-group-tag{font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:8px;margin-left:0.4rem;vertical-align:middle;}
+.hist-action{color:var(--soft);font-size:0.78rem;}
+.hist-date{font-size:0.68rem;color:var(--soft);}
+.hist-pts{font-weight:900;color:var(--navy2);font-size:1.05rem;white-space:nowrap;}
+.btn-del{font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;padding:0.22rem 0.55rem;border-radius:6px;border:1px solid var(--danger);color:var(--danger);background:transparent;cursor:pointer;flex-shrink:0;transition:all 0.15s;}
+.btn-del:hover{background:var(--danger);color:white;}
+.hist-empty{text-align:center;color:var(--soft);padding:2.5rem;font-size:0.9rem;}
+
+/* ── ACCIONES ── */
+.acc-wrap{max-width:700px;margin:0 auto;}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:0.9rem;letter-spacing:1px;}
+.acc-table{width:100%;border-collapse:collapse;background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(13,27,94,0.07);}
+.acc-table th{background:var(--navy);color:white;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:0.75rem 1rem;text-align:left;}
+.acc-table td{padding:0.65rem 1rem;font-size:0.86rem;border-bottom:1px solid var(--border);color:var(--text);}
+.acc-table tr:last-child td{border-bottom:none;}
+.acc-table tr:hover td{background:var(--sky2);}
+.pts-pill{display:inline-block;background:var(--navy);color:white;font-weight:800;font-size:0.75rem;padding:0.18rem 0.6rem;border-radius:20px;}
+.pts-pill-c{background:#00C2CB;}
+
+/* ── EQUIPO ── */
+.team-wrap{max-width:900px;margin:0 auto;}
+.team-group-block{background:white;border-radius:16px;border:1.5px solid var(--border);margin-bottom:1rem;overflow:hidden;}
+.team-group-hdr{padding:0.75rem 1.1rem;display:flex;align-items:center;gap:0.75rem;}
+.team-group-name{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;color:white;letter-spacing:1.5px;}
+.team-list{display:flex;flex-direction:column;gap:0.4rem;padding:0.75rem 1rem;}
+.team-item{background:var(--offwhite);border:1px solid var(--border);border-radius:10px;padding:0.55rem 0.9rem;display:flex;align-items:center;gap:0.65rem;font-weight:700;font-size:0.88rem;}
+.team-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:white;flex-shrink:0;}
+.team-pts{margin-left:auto;font-size:0.78rem;color:var(--soft);font-weight:600;margin-right:0.4rem;}
+.btn-rm{font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;padding:0.22rem 0.55rem;border-radius:6px;border:1px solid var(--danger);color:var(--danger);background:transparent;cursor:pointer;transition:all 0.15s;}
+.btn-rm:hover{background:var(--danger);color:white;}
+.add-member-block{padding:0.75rem 1rem;border-top:1px solid var(--border);}
+.add-row{display:flex;gap:0.6rem;}
+.add-row input{flex:1;}
+.add-row select{width:auto;}
+.btn-add{font-family:'Montserrat',sans-serif;font-size:0.8rem;font-weight:800;padding:0.6rem 1.1rem;background:#00C2CB;color:white;border:none;border-radius:10px;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;}
+.btn-add:hover{opacity:0.85;}
+
+/* ══════════════════════════════════════════
+   SOLICITUDES — VENDEDOR
+══════════════════════════════════════════ */
+.sol-wrap{max-width:620px;margin:0 auto;}
+.sol-hero{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:16px;padding:1.4rem 1.5rem;margin-bottom:1.25rem;color:white;display:flex;align-items:center;gap:1rem;}
+.sol-hero-icon{font-size:2.5rem;flex-shrink:0;}
+.sol-hero-title{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:1px;margin-bottom:0.2rem;}
+.sol-hero-sub{font-size:0.78rem;color:rgba(255,255,255,0.65);line-height:1.5;}
+.sol-form-card{background:white;border-radius:16px;border:1.5px solid var(--border);padding:1.5rem;box-shadow:0 4px 20px rgba(13,27,94,0.07);}
+.sol-pts-preview{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;background:rgba(0,194,203,0.07);border-radius:10px;border-left:4px solid var(--cyan);margin-bottom:1rem;}
+.sol-pts-num{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;color:var(--navy2);line-height:1;}
+.sol-pts-text{font-size:0.8rem;color:var(--soft);font-weight:600;line-height:1.4;}
+.sol-info-note{background:rgba(125,194,67,0.08);border:1px solid rgba(125,194,67,0.3);border-radius:10px;padding:0.75rem 1rem;margin-top:1rem;font-size:0.78rem;color:var(--soft);line-height:1.6;}
+.sol-info-note strong{color:var(--navy);}
+
+/* My pending solicitudes (viewer) */
+.my-sols-wrap{margin-top:1.5rem;}
+.my-sols-title{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:0.75rem;letter-spacing:1px;}
+.my-sol-item{background:white;border-radius:12px;border:1.5px solid var(--border);padding:0.85rem 1rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.75rem;}
+.my-sol-item.st-pending{border-left:4px solid #d69e2e;}
+.my-sol-item.st-approved{border-left:4px solid #38a169;}
+.my-sol-item.st-rejected{border-left:4px solid #e53e3e;}
+.my-sol-main{flex:1;min-width:0;}
+.my-sol-action{font-weight:800;font-size:0.88rem;color:var(--navy);}
+.my-sol-detail{font-size:0.75rem;color:var(--soft);margin-top:0.15rem;}
+.my-sol-date{font-size:0.68rem;color:var(--soft);margin-top:0.1rem;}
+.my-sol-right{text-align:right;flex-shrink:0;}
+.my-sol-pts{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy2);line-height:1;}
+.my-sol-status{font-size:0.65rem;font-weight:800;padding:0.15rem 0.5rem;border-radius:10px;display:inline-block;margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.5px;}
+.st-pending .my-sol-status{background:#fef3c7;color:#92400e;}
+.st-approved .my-sol-status{background:#d1fae5;color:#065f46;}
+.st-rejected .my-sol-status{background:#fee2e2;color:#991b1b;}
+.my-sols-empty{text-align:center;color:var(--soft);font-size:0.85rem;padding:1rem;}
+
+/* ══════════════════════════════════════════
+   BANDEJA — ADMIN
+══════════════════════════════════════════ */
+.bandeja-wrap{max-width:820px;margin:0 auto;}
+.bandeja-stats{display:flex;gap:0.75rem;margin-bottom:1.1rem;flex-wrap:wrap;}
+.bstat{background:white;border-radius:12px;border:1.5px solid var(--border);padding:0.7rem 1.1rem;display:flex;align-items:center;gap:0.6rem;cursor:pointer;transition:all 0.15s;}
+.bstat:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(13,27,94,0.1);}
+.bstat.active-filter{border-color:var(--cyan);background:rgba(0,194,203,0.05);}
+.bstat-icon{font-size:1.3rem;}
+.bstat-num{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+.bstat-label{font-size:0.68rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:0.5px;}
+.bstat.bst-all .bstat-num{color:var(--navy);}
+.bstat.bst-pending .bstat-num{color:#d69e2e;}
+.bstat.bst-approved .bstat-num{color:#38a169;}
+.bstat.bst-rejected .bstat-num{color:#e53e3e;}
+
+.band-filters{display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap;}
+.band-filters select{width:auto;flex:1;min-width:150px;}
+
+.sol-card{background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:0.75rem;overflow:hidden;transition:box-shadow 0.15s;}
+.sol-card:hover{box-shadow:0 4px 16px rgba(13,27,94,0.1);}
+.sol-card.status-pending{border-left:4px solid #d69e2e;}
+.sol-card.status-approved{border-left:4px solid #38a169;}
+.sol-card.status-rejected{border-left:4px solid #e53e3e;}
+.sol-card-head{padding:0.9rem 1rem 0.6rem;display:flex;align-items:flex-start;gap:0.75rem;}
+.sol-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.88rem;font-weight:800;color:white;flex-shrink:0;}
+.sol-head-main{flex:1;min-width:0;}
+.sol-head-name{font-weight:800;color:var(--navy);font-size:0.95rem;display:flex;align-items:center;flex-wrap:wrap;gap:0.3rem;}
+.sol-group-tag{font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:8px;}
+.sol-head-accion{font-size:0.84rem;color:var(--soft);margin-top:0.15rem;font-weight:600;}
+.sol-head-date{font-size:0.7rem;color:var(--soft);margin-top:0.12rem;}
+.sol-right{display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;flex-shrink:0;}
+.sol-pts-badge{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:800;color:var(--navy2);line-height:1;}
+.sol-pts-badge small{display:block;font-size:0.6rem;font-weight:700;color:var(--soft);text-align:center;letter-spacing:0.5px;text-transform:uppercase;}
+.sol-status-pill{font-size:0.65rem;font-weight:800;padding:0.2rem 0.65rem;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+.status-pending .sol-status-pill{background:#fef3c7;color:#92400e;}
+.status-approved .sol-status-pill{background:#d1fae5;color:#065f46;}
+.status-rejected .sol-status-pill{background:#fee2e2;color:#991b1b;}
+.sol-card-fields{padding:0 1rem 0.5rem;display:grid;grid-template-columns:1fr 1fr;gap:0.35rem 1rem;}
+.sol-field label{display:block;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--soft);margin-bottom:0.1rem;}
+.sol-field span{font-size:0.82rem;font-weight:600;color:var(--navy);}
+.sol-obs-row{padding:0 1rem 0.65rem;font-size:0.8rem;color:var(--soft);}
+.sol-obs-row strong{color:var(--navy);}
+.sol-card-footer{padding:0.75rem 1rem;background:var(--offwhite);border-top:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;}
+.assign-label{font-size:0.72rem;font-weight:700;color:var(--soft);text-transform:uppercase;white-space:nowrap;}
+.assign-input{font-family:'Montserrat',sans-serif;padding:0.45rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--text);background:white;outline:none;flex:1;min-width:160px;transition:border-color 0.15s;}
+.assign-input:focus{border-color:var(--cyan);}
+.btn-approve{font-family:'Montserrat',sans-serif;font-size:0.78rem;font-weight:800;padding:0.5rem 1.1rem;border-radius:8px;border:none;background:#38a169;color:white;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.btn-approve:hover{background:#2f855a;}
+.btn-reject{font-family:'Montserrat',sans-serif;font-size:0.78rem;font-weight:800;padding:0.5rem 0.9rem;border-radius:8px;border:1.5px solid #e53e3e;color:#e53e3e;background:transparent;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.btn-reject:hover{background:#e53e3e;color:white;}
+.resolved-info{font-size:0.78rem;font-weight:700;}
+.resolved-info.approved{color:#38a169;}
+.resolved-info.rejected{color:#e53e3e;}
+.bandeja-empty{text-align:center;color:var(--soft);padding:2.5rem;font-size:0.9rem;}
+
+/* ── SAVE / TOAST ── */
+.save-badge{position:fixed;top:66px;right:1rem;font-size:0.7rem;font-weight:700;padding:0.28rem 0.75rem;border-radius:20px;background:rgba(125,194,67,0.15);color:#7DC243;border:1px solid rgba(125,194,67,0.4);opacity:0;transition:opacity 0.4s;z-index:200;pointer-events:none;}
+.save-badge.show{opacity:1;}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:white;padding:0.72rem 1.4rem;border-radius:30px;font-size:0.85rem;font-weight:700;opacity:0;transition:all 0.3s;z-index:9999;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.admin-only-tab{display:none;}
+.viewer-only-tab{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="topo-bg"></div>
+  <svg class="login-mtn" viewBox="0 0 500 110" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="250,10 150,105 350,105" fill="rgba(255,255,255,0.07)"/>
+    <polygon points="250,10 222,58 280,54" fill="rgba(255,255,255,0.1)"/>
+    <polygon points="130,38 55,105 205,105" fill="rgba(255,255,255,0.05)"/>
+    <polygon points="370,48 298,105 442,105" fill="rgba(255,255,255,0.05)"/>
+    <line x1="250" y1="10" x2="250" y2="-1" stroke="#7DC243" stroke-width="1.5"/>
+    <polygon points="250,-1 265,6 250,12" fill="#7DC243"/>
+  </svg>
+  <div class="login-card">
+    <div class="psw-logo"><span style="color:#00C2CB">▲</span>PS<span style="color:#7DC243">W</span></div>
+    <div class="conquiista-h">CONQU<span class="ii">II</span>STA</div>
+    <div class="login-sub">SPIFF de Ventas · 3 Meses</div>
+    <div class="role-btns">
+      <button class="role-btn selected" id="role-admin" onclick="selectRole('admin')">
+        <span class="ri">🔐</span>Administrador
+      </button>
+      <button class="role-btn" id="role-viewer" onclick="selectRole('viewer')">
+        <span class="ri">👀</span>Vendedor
+      </button>
+    </div>
+    <div id="pass-wrap">
+      <input class="login-input" type="password" id="login-pass" placeholder="Contraseña de administrador" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="vendor-wrap" style="display:none;" class="vendor-sel-wrap">
+      <select id="vendor-sel"><option value="">— Selecciona tu nombre —</option></select>
+    </div>
+    <button class="btn-enter" onclick="doLogin()">ENTRAR A LA MONTAÑA →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="app-header">
+    <div class="hdr-l">
+      <div class="hdr-psw"><span style="color:#7DC243">▲</span>PSW</div>
+      <div class="hdr-div"></div>
+      <div class="hdr-cq">CONQU<span class="ii">II</span>STA</div>
+    </div>
+    <div class="hdr-r">
+      <span id="viewer-name-badge" style="font-size:0.72rem;color:rgba(255,255,255,0.7);font-weight:700;"></span>
+      <span class="mode-badge" id="mode-badge"></span>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="mountain-hero">
+    <div class="topo-lines"></div>
+    <div class="hero-top">
+      <div class="stat-pill">
+        <div class="stat-pill-num" id="stat-total">0</div>
+        <div class="stat-pill-label">Pts Totales</div>
+      </div>
+      <div class="hero-title-block">
+        <div class="hero-spiff">SPIFF de Ventas</div>
+        <div class="hero-cq">CONQU<span class="ii">II</span>STA</div>
+        <div class="hero-dur" id="hero-dur"></div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-num">3</div>
+        <div class="stat-pill-label">Grupos</div>
+      </div>
+    </div>
+    <svg id="mountain-svg" viewBox="0 0 980 310" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="tabs-wrapper">
+    <button class="tab-btn active"          onclick="switchTab('ranking',this)">🏔 Ranking</button>
+    <button class="tab-btn"                 onclick="switchTab('premios',this)">🏆 Premios</button>
+    <button class="tab-btn admin-only-tab"  onclick="switchTab('add',this)">➕ Agregar Puntos</button>
+    <button class="tab-btn admin-only-tab"  onclick="switchTab('bandeja',this)" id="tab-bandeja">📥 Solicitudes <span class="tab-notif" id="notif-badge" style="display:none">0</span></button>
+    <button class="tab-btn viewer-only-tab" onclick="switchTab('solicitar',this)">✋ Solicitar Acción</button>
+    <button class="tab-btn"                 onclick="switchTab('historial',this)">📋 Historial</button>
+    <button class="tab-btn"                 onclick="switchTab('acciones',this)">🎯 Acciones</button>
+    <button class="tab-btn admin-only-tab"  onclick="switchTab('equipo',this)">👥 Equipo</button>
+  </div>
+
+  <div class="content-area">
+
+    <!-- RANKING -->
+    <div id="panel-ranking" class="panel active">
+      <div class="groups-wrap" id="groups-wrap"></div>
+    </div>
+
+    <!-- PREMIOS -->
+    <div id="panel-premios" class="panel">
+      <div class="prizes-wrap">
+        <div class="sec-title" style="text-align:center;margin-bottom:1.25rem;">🏆 Premios por Grupo</div>
+        <div class="prizes-grid" id="prizes-grid"></div>
+        <div style="background:white;border-radius:14px;border:1.5px solid var(--border);padding:1.25rem;margin-top:0.5rem;">
+          <div class="sec-title" style="font-size:1.1rem;margin-bottom:0.75rem;">📋 Reglas del Concurso</div>
+          <ul style="font-size:0.85rem;color:var(--soft);line-height:1.9;padding-left:1.25rem;">
+            <li>Duración: <strong>3 meses</strong> desde la fecha de inicio.</li>
+            <li>Cada punto = <strong>1 metro de ascenso</strong> en la montaña.</li>
+            <li>La meta es llegar a los <strong>100 metros (la cima)</strong>.</li>
+            <li>Los premios se otorgan por grupo de forma independiente.</li>
+            <li>En caso de empate, gana quien registró los puntos primero.</li>
+            <li>El administrador valida y registra todas las acciones.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGREGAR PUNTOS (admin) -->
+    <div id="panel-add" class="panel">
+      <div class="form-card">
+        <div class="form-stitle">⛏ Registrar Acción</div>
+        <div class="form-group">
+          <label class="form-label">Grupo</label>
+          <select id="sel-grupo" onchange="onGrupoChange()"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendedor</label>
+          <select id="sel-vendedor"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Acción</label>
+          <select id="sel-accion" onchange="onActionChange()"></select>
+        </div>
+        <div id="emb-section" class="emb-section" style="display:none;margin-bottom:0.75rem;">
+          <div class="emb-label" style="margin-bottom:0.55rem;">Asignar lugares — Embajadores de Mkt en LN</div>
+          <div class="emb-grid">
+            <label><div class="emb-label">🥇 1er — 3 pts</div><select id="emb-1"><option value="">—</option></select></label>
+            <label><div class="emb-label">🥈 2do — 2 pts</div><select id="emb-2"><option value="">—</option></select></label>
+            <label><div class="emb-label">🥉 3er — 1 pt</div><select id="emb-3"><option value="">—</option></select></label>
+          </div>
+        </div>
+        <div id="pts-preview" class="pts-preview" style="display:none;">
+          <span class="pts-preview-num" id="pts-num">+0</span>
+          <span class="pts-preview-text">metros hacia la cima</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nota / Detalle (opcional)</label>
+          <textarea id="nota" rows="2" placeholder="Ej: Cliente Empresa ABC, webinar 10 junio…"></textarea>
+        </div>
+        <button class="btn-primary" onclick="registerPoints()">⛏ REGISTRAR AVANCE</button>
+      </div>
+    </div>
+
+    <!-- SOLICITAR ACCIÓN (viewer) -->
+    <div id="panel-solicitar" class="panel">
+      <div class="sol-wrap">
+        <div class="sol-hero">
+          <div class="sol-hero-icon">✋</div>
+          <div>
+            <div class="sol-hero-title">SOLICITAR ACCIÓN</div>
+            <div class="sol-hero-sub">Registra una acción que realizaste. El administrador la revisará y, al aprobarla, tus puntos se agregarán automáticamente.</div>
+          </div>
+        </div>
+        <div class="sol-form-card">
+          <div class="form-group">
+            <label class="form-label">Tu nombre</label>
+            <input type="text" id="sol-nombre" readonly style="opacity:0.6;cursor:default;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Acción realizada</label>
+            <select id="sol-accion" onchange="onSolActionChange()"></select>
+          </div>
+          <div id="sol-pts-preview" class="sol-pts-preview" style="display:none;">
+            <div class="sol-pts-num" id="sol-pts-num">+0</div>
+            <div class="sol-pts-text">puntos que ganarás<br><span style="font-size:0.72rem;opacity:0.7;">al ser validado por el admin</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cliente</label>
+            <input type="text" id="sol-cliente" placeholder="Nombre del cliente o empresa">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Consultor responsable</label>
+            <input type="text" id="sol-consultor" placeholder="Nombre del consultor">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observaciones</label>
+            <textarea id="sol-obs" rows="3" placeholder="Describe la acción, fecha, contexto adicional…"></textarea>
+          </div>
+          <button class="btn-primary" id="btn-enviar-sol" onclick="enviarSolicitud()">📨 ENVIAR SOLICITUD AL ADMIN</button>
+          <div class="sol-info-note">
+            ⏳ Tu solicitud quedará en <strong>estado Pendiente</strong> hasta que el administrador la revise.<br>
+            Al ser aprobada, los puntos se sumarán automáticamente a tu marcador en la montaña.
+          </div>
+        </div>
+
+        <!-- Mis solicitudes -->
+        <div class="my-sols-wrap">
+          <div class="my-sols-title">MIS SOLICITUDES</div>
+          <div id="my-sols-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANDEJA DE ENTRADA (admin) -->
+    <div id="panel-bandeja" class="panel">
+      <div class="bandeja-wrap">
+        <div class="bandeja-stats">
+          <div class="bstat bst-all active-filter" onclick="filterBandeja('')">
+            <div class="bstat-icon">📥</div>
+            <div><div class="bstat-num" id="cnt-all">0</div><div class="bstat-label">Total</div></div>
+          </div>
+          <div class="bstat bst-pending" onclick="filterBandeja('pending')">
+            <div class="bstat-icon">⏳</div>
+            <div><div class="bstat-num" id="cnt-pending">0</div><div class="bstat-label">Pendientes</div></div>
+          </div>
+          <div class="bstat bst-approved" onclick="filterBandeja('approved')">
+            <div class="bstat-icon">✅</div>
+            <div><div class="bstat-num" id="cnt-approved">0</div><div class="bstat-label">Aprobadas</div></div>
+          </div>
+          <div class="bstat bst-rejected" onclick="filterBandeja('rejected')">
+            <div class="bstat-icon">❌</div>
+            <div><div class="bstat-num" id="cnt-rejected">0</div><div class="bstat-label">Rechazadas</div></div>
+          </div>
+        </div>
+        <div class="band-filters">
+          <select id="band-filter-status" onchange="renderBandeja()">
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="approved">Aprobadas</option>
+            <option value="rejected">Rechazadas</option>
+          </select>
+          <select id="band-filter-grupo" onchange="renderBandeja()">
+            <option value="">Todos los grupos</option>
+          </select>
+          <select id="band-filter-quien" onchange="renderBandeja()">
+            <option value="">Todos los vendedores</option>
+          </select>
+        </div>
+        <div id="bandeja-list"></div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="panel-historial" class="panel">
+      <div class="hist-wrap">
+        <div class="filter-bar">
+          <select id="filter-grupo" onchange="onFilterGrupo()"><option value="">Todos los grupos</option></select>
+          <select id="filter-quien" onchange="renderHistorial()"><option value="">Todos los vendedores</option></select>
+          <select id="filter-accion" onchange="renderHistorial()"><option value="">Todas las acciones</option></select>
+          <button class="btn-clear-all" id="btn-clear-all" style="display:none" onclick="clearAll()">🗑 Borrar todo</button>
+        </div>
+        <div id="hist-list" class="hist-list"></div>
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div id="panel-acciones" class="panel">
+      <div class="acc-wrap">
+        <div class="sec-title">🎯 Tabla de Acciones y Puntos</div>
+        <table class="acc-table">
+          <thead><tr><th>Acción</th><th style="width:110px">Puntos</th></tr></thead>
+          <tbody id="acc-tbody"></tbody>
+        </table>
+        <p style="margin-top:0.9rem;font-size:0.76rem;color:var(--soft);text-align:center;">Cada punto = 1 metro · <strong>Meta: 100 metros = cima</strong></p>
+      </div>
+    </div>
+
+    <!-- EQUIPO (admin) -->
+    <div id="panel-equipo" class="panel">
+      <div class="team-wrap">
+        <div class="sec-title">👥 Gestión del Equipo</div>
+        <div id="team-groups"></div>
+        <div class="team-group-block">
+          <div class="team-group-hdr" style="background:var(--navy);">
+            <span class="team-group-name">AGREGAR INTEGRANTE</span>
+          </div>
+          <div class="add-member-block">
+            <div class="add-row">
+              <input type="text" id="nuevo-nombre" placeholder="Nombre del integrante" onkeydown="if(event.key==='Enter')addMember()">
+              <select id="nuevo-grupo">
+                <option value="0">Comercial</option>
+                <option value="1">Servicio</option>
+                <option value="2">Consultoría</option>
+              </select>
+              <button class="btn-add" onclick="addMember()">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /app -->
+
+<div class="save-badge" id="save-badge">💾 Guardado</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const ADMIN_PASS  = 'conquiista2025';
+const MAX_M       = 100;
+const STORAGE_KEY = 'conquiista_v3';
+
+const GROUPS = [
+  { id:0, key:'comercial',   label:'EQUIPO COMERCIAL',
+    color:'#0D1B5E', colorB:'#1e4fc2',
+    prizes:[{place:'1er Lugar',medal:'🥇',amount:'$4,000 MXN'},{place:'2do Lugar',medal:'🥈',amount:'$3,000 MXN'}],
+    defaultMembers:['Erika','Mesta','Michelle','Gerardo','Monica','Edgar','Memo','Adan','Maria','Fernando','Ivonne'] },
+  { id:1, key:'servicio',    label:'SERVICIO',
+    color:'#00695c', colorB:'#00897b',
+    prizes:[{place:'1er Lugar',medal:'🥇',amount:'$4,000 MXN'}],
+    defaultMembers:['Mario','Gaby','Albino','Yuliana'] },
+  { id:2, key:'consultoria', label:'CONSULTORÍA',
+    color:'#6a1b9a', colorB:'#8e24aa',
+    prizes:[{place:'1er Lugar',medal:'🥇',amount:'$4,000 MXN'}],
+    defaultMembers:['Brenda','Grecia','Lorena','Misael','Rosario','Rocio'] },
+];
+
+const ACCIONES = [
+  {key:'encuesta',    label:'Encuesta de Satisfacción',                        pts:1},
+  {key:'review',      label:'Caso de Éxito — Review en G2',                    pts:2},
+  {key:'video_pres',  label:'Caso de Éxito — Video Entrevista Presencial',      pts:3},
+  {key:'video_linea', label:'Caso de Éxito — Video Entrevista en Línea',        pts:2},
+  {key:'escrita',     label:'Caso de Éxito — Entrevista Escrita/Encuesta',      pts:1},
+  {key:'webinar',     label:'Participar en Webinar, Presencial o Podcast',      pts:4},
+  {key:'embajador',   label:'Embajadores de Mkt en LN (1er/2do/3er lugar)',     pts:null},
+  {key:'referencia',  label:'Recomendaciones / Referencias de Clientes Nuevos', pts:2},
+];
+
+const MEMBER_COLORS=['#0D1B5E','#1e4fc2','#00C2CB','#7DC243','#e05c2a','#805ad5','#d69e2e','#e53e3e','#319795','#dd6b20','#553c9a','#2b6cb0'];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let isAdmin=false, viewerName='', selectedRole='admin';
+let members=[], scores={}, historial=[], solicitudes=[], startDate=new Date();
+let bandejaStatusFilter='';
+
+// ═══════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      members, scores,
+      historial: historial.map(h=>({...h, date:h.date.toISOString()})),
+      solicitudes: solicitudes.map(s=>({...s, date:s.date.toISOString(), resolvedDate:s.resolvedDate?s.resolvedDate.toISOString():null})),
+      startDate: startDate.toISOString()
+    }));
+    flashSave();
+  }catch(e){}
+}
+
+function loadData(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const d=JSON.parse(raw);
+    members   = d.members || defaultMembers();
+    scores    = d.scores  || {};
+    historial = (d.historial||[]).map(h=>({...h, date:new Date(h.date)}));
+    solicitudes=(d.solicitudes||[]).map(s=>({...s, date:new Date(s.date), resolvedDate:s.resolvedDate?new Date(s.resolvedDate):null}));
+    startDate = d.startDate ? new Date(d.startDate) : new Date();
+    return true;
+  }catch(e){ return false; }
+}
+
+function defaultMembers(){
+  const m=[];
+  GROUPS.forEach(g=>g.defaultMembers.forEach(n=>m.push({name:n,groupId:g.id})));
+  return m;
+}
+
+function flashSave(){
+  const b=document.getElementById('save-badge');
+  b.classList.add('show');
+  clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('show'),1800);
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function membersOfGroup(gid){ return members.filter(m=>m.groupId===gid); }
+function getScore(name)      { return scores[name]||0; }
+function groupOf(name)       { return members.find(m=>m.name===name); }
+function groupColor(gid)     { return GROUPS[gid]?.color||'#888'; }
+function initials(n)         { return n.substring(0,2).toUpperCase(); }
+function memberColor(name)   { const i=members.findIndex(m=>m.name===name); return MEMBER_COLORS[i%MEMBER_COLORS.length]; }
+
+// ═══════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════
+function selectRole(r){
+  selectedRole=r;
+  document.getElementById('role-admin').classList.toggle('selected',r==='admin');
+  document.getElementById('role-viewer').classList.toggle('selected',r==='viewer');
+  document.getElementById('pass-wrap').style.display   = r==='admin'  ? 'block' : 'none';
+  document.getElementById('vendor-wrap').style.display = r==='viewer' ? 'block' : 'none';
+  document.getElementById('login-err').textContent='';
+  if(r==='viewer'){
+    const sel=document.getElementById('vendor-sel');
+    sel.innerHTML=`<option value="">— Selecciona tu nombre —</option>`+
+      members.map(m=>`<option value="${m.name}">${m.name} (${GROUPS[m.groupId].label.split(' ')[0]})</option>`).join('');
+  }
+}
+
+function doLogin(){
+  const err=document.getElementById('login-err');
+  if(selectedRole==='admin'){
+    if(document.getElementById('login-pass').value!==ADMIN_PASS){ err.textContent='Contraseña incorrecta.'; return; }
+    isAdmin=true; viewerName='';
+  } else {
+    const sel=document.getElementById('vendor-sel').value;
+    if(!sel){ err.textContent='Selecciona tu nombre.'; return; }
+    isAdmin=false; viewerName=sel;
+  }
+  err.textContent='';
+  document.getElementById('login-screen').style.display='none';
+  const app=document.getElementById('app'); app.style.display='flex';
+
+  document.querySelectorAll('.admin-only-tab').forEach(t=>t.style.display=isAdmin?'inline-block':'none');
+  document.querySelectorAll('.viewer-only-tab').forEach(t=>t.style.display=(!isAdmin)?'inline-block':'none');
+  document.getElementById('btn-clear-all').style.display=isAdmin?'inline-block':'none';
+  document.getElementById('mode-badge').textContent=isAdmin?'🔐 Admin':'👀 Vendedor';
+  document.getElementById('mode-badge').className='mode-badge '+(isAdmin?'mode-admin':'mode-viewer');
+  const vnb=document.getElementById('viewer-name-badge');
+  vnb.textContent=viewerName?`👤 ${viewerName}`:'';
+
+  const end=new Date(startDate); end.setMonth(end.getMonth()+3);
+  const opts={day:'2-digit',month:'short',year:'numeric'};
+  document.getElementById('hero-dur').textContent=startDate.toLocaleDateString('es-MX',opts)+' — '+end.toLocaleDateString('es-MX',opts);
+
+  if(!isAdmin&&viewerName){
+    document.getElementById('filter-quien').value=viewerName;
+    populateSolForm();
+  }
+  renderAll();
+}
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-err').textContent='';
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-ranking').classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.tab-btn').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// MOUNTAIN SVG
+// ═══════════════════════════════════════════
+function drawMountain(){
+  const svg=document.getElementById('mountain-svg');
+  const allSorted=[...members].sort((a,b)=>getScore(b.name)-getScore(a.name));
+  const peak={x:490,y:26}, lBase={x:25,y:285}, lSho={x:255,y:152}, rBase={x:955,y:285}, rSho={x:725,y:162};
+  function posOn(t,side){
+    const b=side==='l'?lBase:rBase, s=side==='l'?lSho:rSho;
+    if(t<=0) return{...b};
+    if(t<0.5){const u=t/0.5;return{x:b.x+(s.x-b.x)*u,y:b.y+(s.y-b.y)*u};}
+    const u=(t-0.5)/0.5; return{x:s.x+(peak.x-s.x)*u,y:s.y+(peak.y-s.y)*u};
+  }
+  let h=`<defs>
+    <linearGradient id="mG" x1="0" y1="0" x2="0.2" y2="1"><stop offset="0%" stop-color="#0D1B5E"/><stop offset="100%" stop-color="#1a3a8f"/></linearGradient>
+    <linearGradient id="sG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#daedf7"/><stop offset="100%" stop-color="#b8d8ea"/></linearGradient>
+    <linearGradient id="wG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4dd9e0"/><stop offset="100%" stop-color="#00C2CB"/></linearGradient>
+  </defs>
+  <ellipse cx="490" cy="340" rx="440" ry="130" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <ellipse cx="490" cy="340" rx="340" ry="100" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+  <polygon points="105,195 5,285 265,285" fill="rgba(30,79,194,0.28)"/>
+  <polygon points="875,205 715,285 960,285" fill="rgba(30,79,194,0.28)"/>
+  <polygon points="165,155 75,285 315,285" fill="rgba(13,27,94,0.32)"/>
+  <polygon points="815,165 665,285 945,285" fill="rgba(13,27,94,0.32)"/>
+  <polygon points="490,26 ${lBase.x},${lBase.y} ${rBase.x},${rBase.y}" fill="url(#mG)"/>
+  <polygon points="490,26 ${lBase.x},${lBase.y} ${lSho.x},${lSho.y}" fill="rgba(0,0,0,0.18)"/>
+  <polygon points="490,26 448,105 532,99" fill="url(#sG)"/>
+  <polygon points="490,26 470,70 510,66" fill="white" opacity="0.65"/>
+  <line x1="${lBase.x+8}" y1="${lBase.y-4}" x2="${peak.x-7}" y2="${peak.y+10}" stroke="rgba(255,255,255,0.09)" stroke-width="1" stroke-dasharray="5,7"/>
+  <line x1="${rBase.x-8}" y1="${rBase.y-4}" x2="${peak.x+7}" y2="${peak.y+10}" stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-dasharray="5,7"/>
+  <line x1="490" y1="26" x2="490" y2="5" stroke="#7DC243" stroke-width="2"/>
+  <polygon points="490,5 508,13 490,19" fill="#7DC243"/>
+  <path d="M0,285 Q120,270 240,280 Q370,290 490,274 Q610,258 730,270 Q855,282 980,267 L980,310 L0,310 Z" fill="url(#wG)" opacity="0.22"/>`;
+  allSorted.forEach((m,idx)=>{
+    const side=idx%2===0?'l':'r';
+    const t=Math.min(0.97,getScore(m.name)/MAX_M);
+    const pos=posOn(t,side);
+    const ox=(Math.floor(idx/2)%2===0?0:(side==='l'?-15:15));
+    const cx=pos.x+ox, cy=pos.y;
+    const col=groupColor(m.groupId);
+    const ini=m.name.substring(0,3);
+    if(idx===0&&getScore(m.name)>0) h+=`<circle cx="${cx}" cy="${cy}" r="14" fill="${col}" opacity="0.22"/>`;
+    h+=`<circle cx="${cx}" cy="${cy}" r="10" fill="${col}" stroke="white" stroke-width="1.8"/>`;
+    h+=`<text x="${cx}" y="${cy+3.5}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="6.5" font-weight="800" fill="white">${ini}</text>`;
+    if(getScore(m.name)>0) h+=`<text x="${cx}" y="${cy-13}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="7" fill="${col}" font-weight="700">${getScore(m.name)}m</text>`;
+  });
+  // Leader panels top-right
+  const panelW=170, panelH=44, panelX=980-panelW-8;
+  GROUPS.forEach((g,i)=>{
+    const py=8+i*(panelH+6);
+    const leaders=membersOfGroup(g.id).sort((a,b)=>getScore(b.name)-getScore(a.name));
+    const ldr=leaders[0], ldrPts=ldr?getScore(ldr.name):0;
+    h+=`<rect x="${panelX}" y="${py}" width="${panelW}" height="${panelH}" rx="7" fill="rgba(0,0,0,0.55)" stroke="${g.colorB}" stroke-width="1" opacity="0.95"/>`;
+    h+=`<circle cx="${panelX+11}" cy="${py+13}" r="5" fill="${g.colorB}"/>`;
+    h+=`<text x="${panelX+21}" y="${py+17}" font-family="Montserrat,sans-serif" font-size="8" font-weight="800" fill="rgba(255,255,255,0.9)">${g.label}</text>`;
+    if(ldr&&ldrPts>0){
+      h+=`<text x="${panelX+9}" y="${py+33}" font-family="Montserrat,sans-serif" font-size="8.5" font-weight="700" fill="${g.colorB}">🏅 ${ldr.name}</text>`;
+      h+=`<text x="${panelX+panelW-8}" y="${py+33}" text-anchor="end" font-family="Montserrat,sans-serif" font-size="9" font-weight="900" fill="#f6c90e">${ldrPts}m</text>`;
+    } else {
+      h+=`<text x="${panelX+9}" y="${py+33}" font-family="Montserrat,sans-serif" font-size="7.5" fill="rgba(255,255,255,0.4)">Sin puntos aún</text>`;
+    }
+  });
+  svg.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════
+// RANKING
+// ═══════════════════════════════════════════
+function renderRanking(){
+  const total=members.reduce((s,m)=>s+getScore(m.name),0);
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('groups-wrap').innerHTML=GROUPS.map(g=>{
+    const mems=membersOfGroup(g.id).sort((a,b)=>getScore(b.name)-getScore(a.name));
+    const leader=mems[0];
+    const prizeStr=g.prizes.map(p=>`${p.medal}${p.place}: ${p.amount}`).join(' · ');
+    const leaderStr=leader&&getScore(leader.name)>0
+      ?`🏅 Líder: <strong>${leader.name}</strong> con ${getScore(leader.name)} metros`
+      :'Sin puntos registrados aún';
+    const cards=mems.map((m,idx)=>{
+      const pts=getScore(m.name), pct=Math.min(100,Math.round(pts/MAX_M*100));
+      const rk=idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':'rank-other';
+      const medal=idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':idx+1;
+      const hasPrize=g.prizes[idx];
+      return `<div class="climber-card ${rk}">
+        <span class="rank-badge" style="background:${idx===0?'#f6c90e':idx===1?'#c0c0c0':idx===2?'#cd7f32':g.color+'22'};color:${idx<3?'#333':'white'}">${medal}</span>
+        <div class="climber-avatar" style="background:${g.color}">${initials(m.name)}</div>
+        <div class="climber-name">${m.name}</div>
+        <div class="climber-pts">${pts}</div>
+        <div class="climber-pts-label">metros</div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:linear-gradient(90deg,${g.color},${g.colorB})"></div></div>
+        <div class="meter-label">${pct}% a la cima</div>
+        ${hasPrize?`<div class="prize-tag" style="background:${g.color}15;color:${g.color};">${hasPrize.medal} ${hasPrize.amount}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="group-block">
+      <div class="group-header" style="background:linear-gradient(135deg,${g.color},${g.colorB});">
+        <div><div class="group-title">${g.label}</div><div class="group-count">${mems.length} integrantes</div></div>
+        <div class="group-meta"><span class="prize-badge">🏆 ${prizeStr}</span></div>
+      </div>
+      <div class="group-leader-line" style="background:${g.color}ee;">${leaderStr}</div>
+      <div class="group-cards">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// PRIZES
+// ═══════════════════════════════════════════
+function renderPrizes(){
+  document.getElementById('prizes-grid').innerHTML=GROUPS.map(g=>`
+    <div class="prize-card" style="background:linear-gradient(135deg,${g.color},${g.colorB})">
+      <div class="prize-card-title">${g.label}</div>
+      ${g.prizes.map(p=>`<div class="prize-place"><span class="prize-place-medal">${p.medal}</span><div><div class="prize-place-text">${p.place}</div><div class="prize-amount">${p.amount}</div></div></div>`).join('')}
+      <div class="prize-note">Solo integrantes del grupo califican para este premio.</div>
+      <div class="prize-mountain">⛰</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// FORM SELECTS (admin add)
+// ═══════════════════════════════════════════
+function populateFormSelects(){
+  const sg=document.getElementById('sel-grupo'); if(!sg)return;
+  sg.innerHTML=GROUPS.map(g=>`<option value="${g.id}">${g.label}</option>`).join('');
+  onGrupoChange();
+  const sa=document.getElementById('sel-accion'),curA=sa.value;
+  sa.innerHTML=ACCIONES.map(a=>`<option value="${a.key}">${a.label}</option>`).join('');
+  if(curA)sa.value=curA;
+  ['filter-grupo','filter-quien','filter-accion'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    const cur=el.value;
+    if(id==='filter-grupo') el.innerHTML=`<option value="">Todos los grupos</option>`+GROUPS.map(g=>`<option value="${g.id}">${g.label}</option>`).join('');
+    else if(id==='filter-quien') el.innerHTML=`<option value="">Todos los vendedores</option>`+members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+    else if(id==='filter-accion') el.innerHTML=`<option value="">Todas las acciones</option>`+ACCIONES.map(a=>`<option value="${a.key}">${a.label}</option>`).join('');
+    if(cur) el.value=cur;
+  });
+  const bfg=document.getElementById('band-filter-grupo'); if(bfg){ const c=bfg.value; bfg.innerHTML=`<option value="">Todos los grupos</option>`+GROUPS.map(g=>`<option value="${g.id}">${g.label}</option>`).join(''); if(c)bfg.value=c; }
+  const bfq=document.getElementById('band-filter-quien'); if(bfq){ const c=bfq.value; bfq.innerHTML=`<option value="">Todos los vendedores</option>`+members.map(m=>`<option value="${m.name}">${m.name}</option>`).join(''); if(c)bfq.value=c; }
+}
+
+function onGrupoChange(){
+  const gid=parseInt(document.getElementById('sel-grupo').value);
+  const sv=document.getElementById('sel-vendedor'), cur=sv.value;
+  const mems=membersOfGroup(gid);
+  sv.innerHTML=mems.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+  if(cur&&mems.find(m=>m.name===cur)) sv.value=cur;
+  ['emb-1','emb-2','emb-3'].forEach(id=>{
+    const el=document.getElementById(id),c=el.value;
+    el.innerHTML=`<option value="">—</option>`+mems.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+    if(c&&mems.find(m=>m.name===c)) el.value=c;
+  });
+}
+
+function onActionChange(){
+  const key=document.getElementById('sel-accion').value;
+  const emb=document.getElementById('emb-section'), prev=document.getElementById('pts-preview'), num=document.getElementById('pts-num');
+  if(key==='embajador'){emb.style.display='block';prev.style.display='none';}
+  else{emb.style.display='none';const ac=ACCIONES.find(a=>a.key===key);if(ac){num.textContent=`+${ac.pts}`;prev.style.display='flex';}}
+}
+
+function onFilterGrupo(silent){
+  const gid=document.getElementById('filter-grupo').value;
+  const fq=document.getElementById('filter-quien'), cur=fq.value;
+  const mems=gid===''?members:members.filter(m=>m.groupId===parseInt(gid));
+  fq.innerHTML=`<option value="">Todos los vendedores</option>`+mems.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+  if(cur&&mems.find(m=>m.name===cur)) fq.value=cur;
+  if(!silent) renderHistorial();
+}
+
+// ═══════════════════════════════════════════
+// REGISTER POINTS (admin direct)
+// ═══════════════════════════════════════════
+function registerPoints(){
+  const gid=parseInt(document.getElementById('sel-grupo').value);
+  const vendedor=document.getElementById('sel-vendedor').value;
+  const key=document.getElementById('sel-accion').value;
+  const nota=document.getElementById('nota').value.trim();
+  const now=new Date();
+  if(!vendedor){showToast('Selecciona un vendedor');return;}
+  if(key==='embajador'){
+    const e1=document.getElementById('emb-1').value, e2=document.getElementById('emb-2').value, e3=document.getElementById('emb-3').value;
+    if(!e1&&!e2&&!e3){showToast('Asigna al menos un lugar');return;}
+    [[e1,3,'1er lugar'],[e2,2,'2do lugar'],[e3,1,'3er lugar']].forEach(([n,p,lug])=>{
+      if(n){ const mg=groupOf(n); scores[n]=(scores[n]||0)+p; historial.unshift({id:Date.now()+Math.random(),name:n,groupId:mg?mg.groupId:gid,key,label:`Embajador Mkt LN — ${lug}`,pts:p,nota,date:now}); }
+    });
+    showToast('🏅 Puntos de embajador registrados');
+  } else {
+    const ac=ACCIONES.find(a=>a.key===key); if(!ac)return;
+    scores[vendedor]=(scores[vendedor]||0)+ac.pts;
+    historial.unshift({id:Date.now(),name:vendedor,groupId:gid,key,label:ac.label,pts:ac.pts,nota,date:now});
+    showToast(`⛏ +${ac.pts} metros para ${vendedor}!`);
+  }
+  document.getElementById('nota').value='';
+  saveData(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+// SOLICITAR ACCIÓN (viewer)
+// ═══════════════════════════════════════════
+function populateSolForm(){
+  const ni=document.getElementById('sol-nombre'); if(ni) ni.value=viewerName;
+  const sa=document.getElementById('sol-accion'); if(!sa)return;
+  sa.innerHTML=ACCIONES.map(a=>`<option value="${a.key}">${a.label}</option>`).join('');
+  onSolActionChange();
+  renderMySols();
+}
+
+function onSolActionChange(){
+  const key=document.getElementById('sol-accion').value;
+  const ac=ACCIONES.find(a=>a.key===key);
+  const prev=document.getElementById('sol-pts-preview'), num=document.getElementById('sol-pts-num');
+  if(ac){ num.textContent=ac.pts===null?'+3/2/1':`+${ac.pts}`; prev.style.display='flex'; }
+  else { prev.style.display='none'; }
+}
+
+function enviarSolicitud(){
+  const accionKey=document.getElementById('sol-accion').value;
+  const cliente  =document.getElementById('sol-cliente').value.trim();
+  const consultor=document.getElementById('sol-consultor').value.trim();
+  const obs      =document.getElementById('sol-obs').value.trim();
+  const ac=ACCIONES.find(a=>a.key===accionKey);
+  const mg=groupOf(viewerName);
+  if(!cliente)  {showToast('Escribe el nombre del cliente');return;}
+  if(!consultor){showToast('Escribe el nombre del consultor');return;}
+  if(!ac)       {showToast('Selecciona una acción');return;}
+
+  const sol={
+    id: Date.now()+Math.random(),
+    name: viewerName,
+    groupId: mg?mg.groupId:0,
+    accionKey,
+    accionLabel: ac.label,
+    pts: ac.pts,
+    cliente, consultor, obs,
+    date: new Date(),
+    status: 'pending',
+    assignedBy: '',
+    resolvedDate: null
+  };
+  solicitudes.unshift(sol);
+  saveData();
+
+  document.getElementById('sol-cliente').value='';
+  document.getElementById('sol-consultor').value='';
+  document.getElementById('sol-obs').value='';
+
+  updateNotifBadge();
+  renderMySols();
+  showToast('✅ Solicitud enviada — el admin la revisará en la bandeja');
+}
+
+function renderMySols(){
+  const list=solicitudes.filter(s=>s.name===viewerName);
+  const el=document.getElementById('my-sols-list'); if(!el)return;
+  if(!list.length){el.innerHTML=`<div class="my-sols-empty">No tienes solicitudes aún.</div>`;return;}
+  el.innerHTML=list.map(s=>{
+    const ds=s.date.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const ptsShow=s.pts===null?'3/2/1':String(s.pts);
+    const statusLabel=s.status==='pending'?'⏳ Pendiente':s.status==='approved'?'✅ Aprobada':'❌ Rechazada';
+    const resolvedStr=s.resolvedDate&&s.assignedBy?` · Gestionada por ${s.assignedBy}`:'';
+    return `<div class="my-sol-item st-${s.status}">
+      <div class="my-sol-main">
+        <div class="my-sol-action">${s.accionLabel}</div>
+        <div class="my-sol-detail">👤 ${s.cliente} · 🧑‍💼 ${s.consultor}${s.obs?' · '+s.obs:''}</div>
+        <div class="my-sol-date">📅 ${ds}${resolvedStr}</div>
+      </div>
+      <div class="my-sol-right">
+        <div class="my-sol-pts">+${ptsShow}</div>
+        <span class="my-sol-status">${statusLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// BANDEJA (admin)
+// ═══════════════════════════════════════════
+function filterBandeja(status){
+  bandejaStatusFilter=status;
+  document.getElementById('band-filter-status').value=status;
+  document.querySelectorAll('.bstat').forEach(b=>b.classList.remove('active-filter'));
+  const map={'':'bst-all','pending':'bst-pending','approved':'bst-approved','rejected':'bst-rejected'};
+  document.querySelector('.'+map[status])?.classList.add('active-filter');
+  renderBandeja();
+}
+
+function renderBandeja(){
+  const fs=document.getElementById('band-filter-status')?.value||'';
+  const fg=document.getElementById('band-filter-grupo')?.value||'';
+  const fq=document.getElementById('band-filter-quien')?.value||'';
+
+  // Stats
+  document.getElementById('cnt-all').textContent     = solicitudes.length;
+  document.getElementById('cnt-pending').textContent  = solicitudes.filter(s=>s.status==='pending').length;
+  document.getElementById('cnt-approved').textContent = solicitudes.filter(s=>s.status==='approved').length;
+  document.getElementById('cnt-rejected').textContent = solicitudes.filter(s=>s.status==='rejected').length;
+
+  let list=solicitudes.filter(s=>{
+    if(fs&&s.status!==fs)return false;
+    if(fg&&String(s.groupId)!==fg)return false;
+    if(fq&&s.name!==fq)return false;
+    return true;
+  });
+
+  const el=document.getElementById('bandeja-list'); if(!el)return;
+  if(!list.length){el.innerHTML=`<div class="bandeja-empty">📥 No hay solicitudes que mostrar.</div>`;return;}
+
+  el.innerHTML=list.map(sol=>{
+    const col=memberColor(sol.name);
+    const g=GROUPS[sol.groupId]||GROUPS[0];
+    const ini=sol.name.substring(0,2).toUpperCase();
+    const ds=sol.date.toLocaleDateString('es-MX',{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const ptsShow=sol.pts===null?'3/2/1':String(sol.pts);
+    const statusLabel=sol.status==='pending'?'⏳ Pendiente':sol.status==='approved'?'✅ Aprobada':'❌ Rechazada';
+
+    const footerHtml = sol.status==='pending'
+      ? `<span class="assign-label">Asignado por:</span>
+         <input class="assign-input" type="text" id="ai-${sol.id}" placeholder="Tu nombre" value="${sol.assignedBy||''}">
+         <button class="btn-approve" onclick="approveSol('${sol.id}')">✅ Aprobar y dar puntos</button>
+         <button class="btn-reject"  onclick="rejectSol('${sol.id}')">❌ Rechazar</button>`
+      : sol.status==='approved'
+        ? `<span class="resolved-info approved">✅ Aprobada por <strong>${sol.assignedBy||'Admin'}</strong>${sol.resolvedDate?' · '+sol.resolvedDate.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):''}</span>`
+        : `<span class="resolved-info rejected">❌ Rechazada por <strong>${sol.assignedBy||'Admin'}</strong>${sol.resolvedDate?' · '+sol.resolvedDate.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):''}</span>`;
+
+    return `<div class="sol-card status-${sol.status}">
+      <div class="sol-card-head">
+        <div class="sol-av" style="background:${col}">${ini}</div>
+        <div class="sol-head-main">
+          <div class="sol-head-name">${sol.name}
+            <span class="sol-group-tag hist-group-tag" style="background:${g.color}18;color:${g.color}">${g.label.split(' ')[0]}</span>
+          </div>
+          <div class="sol-head-accion">${sol.accionLabel}</div>
+          <div class="sol-head-date">📅 ${ds}</div>
+        </div>
+        <div class="sol-right">
+          <div class="sol-pts-badge">${ptsShow}<small>puntos</small></div>
+          <span class="sol-status-pill">${statusLabel}</span>
+        </div>
+      </div>
+      <div class="sol-card-fields">
+        <div class="sol-field"><label>Cliente</label><span>${sol.cliente||'—'}</span></div>
+        <div class="sol-field"><label>Consultor</label><span>${sol.consultor||'—'}</span></div>
+      </div>
+      ${sol.obs?`<div class="sol-obs-row"><strong>Observación:</strong> ${sol.obs}</div>`:''}
+      <div class="sol-card-footer">${footerHtml}</div>
+    </div>`;
+  }).join('');
+
+  updateNotifBadge();
+}
+
+function approveSol(id){
+  const sol=solicitudes.find(s=>String(s.id)===String(id));
+  if(!sol||sol.status!=='pending')return;
+  const assignedBy=(document.getElementById(`ai-${id}`)?.value||'').trim();
+  if(!assignedBy){showToast('Escribe quién está aprobando');return;}
+  if(sol.pts===null){showToast('Para Embajadores usa la pestaña ➕ Agregar Puntos y asigna 1er/2do/3er lugar');return;}
+
+  const mg=groupOf(sol.name);
+  const gid=mg?mg.groupId:sol.groupId;
+  scores[sol.name]=(scores[sol.name]||0)+sol.pts;
+  historial.unshift({
+    id:Date.now()+Math.random(),
+    name:sol.name, groupId:gid,
+    key:sol.accionKey, label:`${sol.accionLabel} (cliente: ${sol.cliente||'—'})`,
+    pts:sol.pts,
+    nota:`Aprobado por ${assignedBy}${sol.obs?' · '+sol.obs:''}`,
+    date:new Date()
+  });
+  sol.status='approved'; sol.assignedBy=assignedBy; sol.resolvedDate=new Date();
+  saveData(); renderAll();
+  showToast(`✅ +${sol.pts} pts para ${sol.name} — aprobado por ${assignedBy}`);
+}
+
+function rejectSol(id){
+  const sol=solicitudes.find(s=>String(s.id)===String(id));
+  if(!sol||sol.status!=='pending')return;
+  const assignedBy=(document.getElementById(`ai-${id}`)?.value||'').trim();
+  if(!confirm(`¿Rechazar la solicitud de ${sol.name}?`))return;
+  sol.status='rejected'; sol.assignedBy=assignedBy||'Admin'; sol.resolvedDate=new Date();
+  saveData(); renderBandeja(); renderMySols();
+  showToast(`❌ Solicitud de ${sol.name} rechazada`);
+}
+
+function updateNotifBadge(){
+  const pending=solicitudes.filter(s=>s.status==='pending').length;
+  const badge=document.getElementById('notif-badge');
+  if(badge){badge.style.display=pending>0?'inline-flex':'none'; badge.textContent=pending;}
+}
+
+// ═══════════════════════════════════════════
+// HISTORIAL
+// ═══════════════════════════════════════════
+function renderHistorial(){
+  const fgVal=document.getElementById('filter-grupo').value;
+  const fq=document.getElementById('filter-quien').value;
+  const fa=document.getElementById('filter-accion').value;
+  let list=historial.filter(h=>{
+    if(fgVal!==''&&String(h.groupId)!==fgVal)return false;
+    if(fq&&h.name!==fq)return false;
+    if(fa&&h.key!==fa)return false;
+    return true;
+  });
+  if(!isAdmin&&viewerName) list=historial.filter(h=>h.name===viewerName);
+  const el=document.getElementById('hist-list');
+  if(!list.length){el.innerHTML=`<div class="hist-empty">📋 No hay registros que mostrar.</div>`;return;}
+  el.innerHTML=list.map(h=>{
+    const col=memberColor(h.name), g=GROUPS[h.groupId]||GROUPS[0], ini=h.name.substring(0,2).toUpperCase();
+    const ds=h.date.toLocaleDateString('es-MX',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+    const delBtn=isAdmin?`<button class="btn-del" onclick="deleteEntry('${h.id}')">✕</button>`:'';
+    return `<div class="hist-item">
+      <div class="hist-av" style="background:${col}">${ini}</div>
+      <div class="hist-main">
+        <div class="hist-name">${h.name}<span class="hist-group-tag" style="background:${g.color}18;color:${g.color}">${g.label.split(' ')[0]}</span></div>
+        <div class="hist-action">${h.label}${h.nota?` — <em style="opacity:0.7">${h.nota}</em>`:''}</div>
+        <div class="hist-date">📅 ${ds}</div>
+      </div>
+      <div class="hist-pts">+${h.pts}m</div>
+      ${delBtn}
+    </div>`;
+  }).join('');
+}
+
+function deleteEntry(id){
+  const entry=historial.find(h=>String(h.id)===String(id)); if(!entry)return;
+  if(!confirm(`¿Borrar: "${entry.label}" de ${entry.name} (+${entry.pts} pts)?`))return;
+  scores[entry.name]=Math.max(0,(scores[entry.name]||0)-entry.pts);
+  historial=historial.filter(h=>String(h.id)!==String(id));
+  showToast(`🗑 Eliminado de ${entry.name}`); saveData(); renderAll();
+}
+
+function clearAll(){
+  if(!confirm('¿Borrar TODO el historial y reiniciar puntos?'))return;
+  scores={}; historial=[]; showToast('🗑 Datos reiniciados'); saveData(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+// ACCIONES TABLE
+// ═══════════════════════════════════════════
+function renderAcciones(){
+  document.getElementById('acc-tbody').innerHTML=ACCIONES.map(a=>{
+    const p=a.pts===null?`<span class="pts-pill pts-pill-c">3 / 2 / 1</span>`:`<span class="pts-pill">${a.pts}</span>`;
+    return `<tr><td>${a.label}</td><td>${p}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// EQUIPO
+// ═══════════════════════════════════════════
+function renderTeam(){
+  document.getElementById('team-groups').innerHTML=GROUPS.map(g=>{
+    const mems=membersOfGroup(g.id);
+    return `<div class="team-group-block">
+      <div class="team-group-hdr" style="background:linear-gradient(135deg,${g.color},${g.colorB});">
+        <span class="team-group-name">${g.label}</span>
+        <span style="color:rgba(255,255,255,0.6);font-size:0.75rem;font-weight:600;margin-left:auto;">${mems.length} integrantes</span>
+      </div>
+      <div class="team-list">
+        ${mems.map(m=>`<div class="team-item">
+          <div class="team-av" style="background:${g.color}">${initials(m.name)}</div>
+          <span>${m.name}</span>
+          <span class="team-pts">${getScore(m.name)} pts</span>
+          <button class="btn-rm" onclick="removeMember('${m.name}')">✕</button>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addMember(){
+  const input=document.getElementById('nuevo-nombre'), gid=parseInt(document.getElementById('nuevo-grupo').value), name=input.value.trim();
+  if(!name){showToast('Escribe un nombre');return;}
+  if(members.find(m=>m.name===name)){showToast('Ya existe ese integrante');return;}
+  members.push({name,groupId:gid}); input.value='';
+  saveData(); renderAll(); showToast(`✅ ${name} agregado a ${GROUPS[gid].label}`);
+}
+
+function removeMember(name){
+  if(!confirm(`¿Eliminar a ${name}? Se eliminarán sus puntos e historial.`))return;
+  members=members.filter(m=>m.name!==name); delete scores[name]; historial=historial.filter(h=>h.name!==name);
+  saveData(); renderAll(); showToast(`${name} eliminado`);
+}
+
+// ═══════════════════════════════════════════
+// TABS / TOAST
+// ═══════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ═══════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════
+function renderAll(){
+  drawMountain(); renderRanking(); renderPrizes(); renderHistorial(); renderTeam();
+  if(isAdmin){ populateFormSelects(); onActionChange(); renderBandeja(); }
+  if(!isAdmin&&viewerName) renderMySols();
+  updateNotifBadge();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+(function init(){
+  const loaded=loadData();
+  if(!loaded){ members=defaultMembers(); scores={}; historial=[]; solicitudes=[]; startDate=new Date(); }
+  renderAcciones();
+  selectRole('admin');
+})();
+</script>
+</body>
+</html>
