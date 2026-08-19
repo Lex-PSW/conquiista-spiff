@@ -1,5 +1,4 @@
 // CONFIG
-const ADMIN_PASS  = 'conquiista2025';
 const MAX_M       = 100;
 const STORAGE_KEY = 'conquiista_v3';
 
@@ -17,6 +16,15 @@ const GROUPS = [
     prizes:[{place:'1er Lugar',medal:'🥇',amount:'$4,000 MXN'}],
     defaultMembers:['Brenda','Grecia','Lorena','Misael','Rosario','Rocio'] },
 ];
+
+function defaultMembers() {
+  return GROUPS.flatMap(group =>
+    group.defaultMembers.map(name => ({
+      name,
+      groupId: group.id
+    }))
+  );
+}
 
 const ACCIONES = [
   {key:'encuesta',    label:'Encuesta de Satisfacción',                        pts:1},
@@ -36,43 +44,26 @@ let isAdmin=false, viewerName='', selectedRole='admin';
 let members=[], scores={}, historial=[], solicitudes=[], startDate=new Date();
 let bandejaStatusFilter='';
 
-// STORAGE
-function saveData(){
+// FIRESTORE STORAGE
+async function saveData(){
+  if(!isAdmin) return; // Sellers can only create their own requests.
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      members, scores,
-      historial: historial.map(h=>({...h, date:h.date.toISOString()})),
-      solicitudes: solicitudes.map(s=>({...s, date:s.date.toISOString(), resolvedDate:s.resolvedDate?s.resolvedDate.toISOString():null})),
-      startDate: startDate.toISOString()
-    }));
+    await dbSaveState({members, scores, historial, startDate});
     flashSave();
-  }catch(e){}
+  }catch(e){ console.error(e); showToast('⚠ No se pudo guardar en Firebase'); }
 }
 
-function loadData(){
+async function loadData(){
   try{
-    const raw=localStorage.getItem(STORAGE_KEY);
-    if(!raw) return false;
-    const d=JSON.parse(raw);
+    const d=await dbLoadState();
+    if(!d) return false;
     members   = d.members || defaultMembers();
-    scores    = d.scores  || {};
+    scores    = d.scores || {};
     historial = (d.historial||[]).map(h=>({...h, date:new Date(h.date)}));
-    solicitudes=(d.solicitudes||[]).map(s=>({...s, date:new Date(s.date), resolvedDate:s.resolvedDate?new Date(s.resolvedDate):null}));
     startDate = d.startDate ? new Date(d.startDate) : new Date();
+    solicitudes = await dbLoadRequests();
     return true;
-  }catch(e){ return false; }
-}
-
-function defaultMembers(){
-  const m=[];
-  GROUPS.forEach(g=>g.defaultMembers.forEach(n=>m.push({name:n,groupId:g.id})));
-  return m;
-}
-
-function flashSave(){
-  const b=document.getElementById('save-badge');
-  b.classList.add('show');
-  clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('show'),1800);
+  }catch(e){ console.error(e); return false; }
 }
 
 // HELPERS
@@ -88,50 +79,51 @@ function selectRole(r){
   selectedRole=r;
   document.getElementById('role-admin').classList.toggle('selected',r==='admin');
   document.getElementById('role-viewer').classList.toggle('selected',r==='viewer');
-  document.getElementById('pass-wrap').style.display   = r==='admin'  ? 'block' : 'none';
-  document.getElementById('vendor-wrap').style.display = r==='viewer' ? 'block' : 'none';
   document.getElementById('login-err').textContent='';
-  if(r==='viewer'){
-    const sel=document.getElementById('vendor-sel');
-    sel.innerHTML=`<option value="">— Selecciona tu nombre —</option>`+
-      members.map(m=>`<option value="${m.name}">${m.name} (${GROUPS[m.groupId].label.split(' ')[0]})</option>`).join('');
-  }
 }
 
-function doLogin(){
+async function doLogin(){
   const err=document.getElementById('login-err');
-  if(selectedRole==='admin'){
-    if(document.getElementById('login-pass').value!==ADMIN_PASS){ err.textContent='Contraseña incorrecta.'; return; }
-    isAdmin=true; viewerName='';
-  } else {
-    const sel=document.getElementById('vendor-sel').value;
-    if(!sel){ err.textContent='Selecciona tu nombre.'; return; }
-    isAdmin=false; viewerName=sel;
-  }
-  err.textContent='';
-  document.getElementById('login-screen').style.display='none';
-  const app=document.getElementById('app'); app.style.display='flex';
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-pass').value;
+  if(!email||!password){err.textContent='Captura correo y contraseña.';return;}
+  try{
+    err.textContent='Validando...';
+    const profile=await firebaseSignIn(email,password);
+    const expected=selectedRole==='admin'?'admin':'seller';
+    if(profile.role!==expected){ await firebaseSignOut(); throw new Error('El rol seleccionado no corresponde a este usuario.'); }
+    isAdmin=profile.role==='admin';
+    viewerName=isAdmin?'':(profile.memberName||profile.name||'');
+    if(!isAdmin&&!viewerName){ await firebaseSignOut(); throw new Error('El vendedor no tiene memberName configurado.'); }
 
-  document.querySelectorAll('.admin-only-tab').forEach(t=>t.style.display=isAdmin?'inline-block':'none');
-  document.querySelectorAll('.viewer-only-tab').forEach(t=>t.style.display=(!isAdmin)?'inline-block':'none');
-  document.getElementById('btn-clear-all').style.display=isAdmin?'inline-block':'none';
-  document.getElementById('mode-badge').textContent=isAdmin?'🔐 Admin':'👀 Vendedor';
-  document.getElementById('mode-badge').className='mode-badge '+(isAdmin?'mode-admin':'mode-viewer');
-  const vnb=document.getElementById('viewer-name-badge');
-  vnb.textContent=viewerName?`👤 ${viewerName}`:'';
+    let loaded=await loadData();
+    if(!loaded && isAdmin){
+      members=defaultMembers(); scores={}; historial=[]; solicitudes=[]; startDate=new Date();
+      await dbSeedState({members,scores,historial,startDate});
+      loaded=await loadData();
+    }
+    if(!loaded) throw new Error('La aplicación aún no ha sido inicializada por un administrador.');
 
-  const end=new Date(startDate); end.setMonth(end.getMonth()+3);
-  const opts={day:'2-digit',month:'short',year:'numeric'};
-  document.getElementById('hero-dur').textContent=startDate.toLocaleDateString('es-MX',opts)+' — '+end.toLocaleDateString('es-MX',opts);
-
-  if(!isAdmin&&viewerName){
-    document.getElementById('filter-quien').value=viewerName;
-    populateSolForm();
-  }
-  renderAll();
+    err.textContent='';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.querySelectorAll('.admin-only-tab').forEach(t=>t.style.display=isAdmin?'inline-block':'none');
+    document.querySelectorAll('.viewer-only-tab').forEach(t=>t.style.display=(!isAdmin)?'inline-block':'none');
+    document.getElementById('btn-clear-all').style.display=isAdmin?'inline-block':'none';
+    document.getElementById('mode-badge').textContent=isAdmin?'🔐 Admin':'👀 Vendedor';
+    document.getElementById('mode-badge').className='mode-badge '+(isAdmin?'mode-admin':'mode-viewer');
+    document.getElementById('viewer-name-badge').textContent=viewerName?`👤 ${viewerName}`:'';
+    const end=new Date(startDate); end.setMonth(end.getMonth()+3);
+    const opts={day:'2-digit',month:'short',year:'numeric'};
+    document.getElementById('hero-dur').textContent=startDate.toLocaleDateString('es-MX',opts)+' — '+end.toLocaleDateString('es-MX',opts);
+    if(!isAdmin&&viewerName){ document.getElementById('filter-quien').value=viewerName; populateSolForm(); }
+    renderAll();
+  }catch(e){ console.error(e); err.textContent=e.message||'No fue posible iniciar sesión.'; }
 }
 
-function doLogout(){
+async function doLogout(){
+  await firebaseSignOut();
+  isAdmin=false; viewerName='';
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-pass').value='';
@@ -345,7 +337,7 @@ function onSolActionChange(){
   else { prev.style.display='none'; }
 }
 
-function enviarSolicitud(){
+async function enviarSolicitud(){
   const accionKey=document.getElementById('sol-accion').value;
   const cliente  =document.getElementById('sol-cliente').value.trim();
   const consultor=document.getElementById('sol-consultor').value.trim();
@@ -369,8 +361,10 @@ function enviarSolicitud(){
     assignedBy: '',
     resolvedDate: null
   };
-  solicitudes.unshift(sol);
-  saveData();
+  try{
+    sol.id=await dbCreateRequest(sol);
+    solicitudes.unshift(sol);
+  }catch(e){ console.error(e); showToast('⚠ No se pudo enviar la solicitud'); return; }
 
   document.getElementById('sol-cliente').value='';
   document.getElementById('sol-consultor').value='';
@@ -479,7 +473,7 @@ function renderBandeja(){
   updateNotifBadge();
 }
 
-function approveSol(id){
+async function approveSol(id){
   const sol=solicitudes.find(s=>String(s.id)===String(id));
   if(!sol||sol.status!=='pending')return;
   const assignedBy=(document.getElementById(`ai-${id}`)?.value||'').trim();
@@ -498,17 +492,21 @@ function approveSol(id){
     date:new Date()
   });
   sol.status='approved'; sol.assignedBy=assignedBy; sol.resolvedDate=new Date();
-  saveData(); renderAll();
+  try{ await dbUpdateRequest(sol.id,{status:'approved',assignedBy,resolvedDate:sol.resolvedDate}); await saveData(); }
+  catch(e){ console.error(e); showToast('⚠ Error guardando aprobación'); return; }
+  renderAll();
   showToast(`✅ +${sol.pts} pts para ${sol.name} — aprobado por ${assignedBy}`);
 }
 
-function rejectSol(id){
+async function rejectSol(id){
   const sol=solicitudes.find(s=>String(s.id)===String(id));
   if(!sol||sol.status!=='pending')return;
   const assignedBy=(document.getElementById(`ai-${id}`)?.value||'').trim();
   if(!confirm(`¿Rechazar la solicitud de ${sol.name}?`))return;
   sol.status='rejected'; sol.assignedBy=assignedBy||'Admin'; sol.resolvedDate=new Date();
-  saveData(); renderBandeja(); renderMySols();
+  try{ await dbUpdateRequest(sol.id,{status:'rejected',assignedBy:sol.assignedBy,resolvedDate:sol.resolvedDate}); }
+  catch(e){ console.error(e); showToast('⚠ Error guardando rechazo'); return; }
+  renderBandeja(); renderMySols();
   showToast(`❌ Solicitud de ${sol.name} rechazada`);
 }
 
@@ -629,8 +627,7 @@ function renderAll(){
 
 // INIT
 (function init(){
-  const loaded=loadData();
-  if(!loaded){ members=defaultMembers(); scores={}; historial=[]; solicitudes=[]; startDate=new Date(); }
+  members=defaultMembers(); scores={}; historial=[]; solicitudes=[]; startDate=new Date();
   renderAcciones();
   selectRole('admin');
 })();

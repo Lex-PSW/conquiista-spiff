@@ -266,3 +266,5 @@ select:focus,input:focus,textarea:focus{border-color:#00C2CB;background:white;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);} 
 .admin-only-tab{display:none;} 
 .viewer-only-tab{display:none;} 
+/* Firebase login additions */
+#pass-wrap .login-input + .login-input { margin-top: .65rem; }
